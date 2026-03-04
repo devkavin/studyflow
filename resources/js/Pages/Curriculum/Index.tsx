@@ -122,7 +122,7 @@ export default function Index({ subjects }: { subjects: Subject[] }) {
                         <label className="space-y-1 text-sm"><span className="text-slate-500">Task title</span><input className="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-950" placeholder="e.g. Practice 20 mixed problems" value={taskForm.data.title} onChange={(e) => taskForm.setData('title', e.target.value)} /></label>
                         <label className="space-y-1 text-sm"><span className="text-slate-500">Notes (optional)</span><textarea rows={2} className="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-950" placeholder="What should be completed in this task?" value={taskForm.data.notes} onChange={(e) => taskForm.setData('notes', e.target.value)} /></label>
                         <div className="grid gap-2 sm:grid-cols-2">
-                            <label className="space-y-1 text-sm"><span className="text-slate-500">Due date</span><DatePickerInput value={taskForm.data.due_date} onChange={(value) => taskForm.setData('due_date', value)} placeholder="Pick due date" /></label>
+                            <label className="flex flex-col gap-1 text-sm"><span className="text-slate-500">Due date</span><DatePickerInput value={taskForm.data.due_date} onChange={(value) => taskForm.setData('due_date', value)} placeholder="Pick due date" /></label>
                             <label className="space-y-1 text-sm"><span className="text-slate-500">Initial status</span><select className="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-950" value={taskForm.data.status} onChange={(e) => taskForm.setData('status', e.target.value as Task['status'])}><option value="todo">To do</option><option value="doing">In progress</option><option value="done">Completed</option></select></label>
                         </div>
                         <div className="grid gap-2 sm:grid-cols-2">
@@ -169,7 +169,7 @@ export default function Index({ subjects }: { subjects: Subject[] }) {
                                                                 </div>
                                                                 <div className="mt-2 flex items-center gap-2">
                                                                     <span className="text-xs text-slate-500">Status</span>
-                                                                    <select className="rounded-md border-slate-300 text-xs dark:border-slate-700 dark:bg-slate-950" value={task.status} onChange={(e) => router.patch(route('tasks.status', task.id), { status: e.target.value }, { preserveScroll: true })}>
+                                                                    <select className="rounded-md border-slate-300 text-xs dark:border-slate-700 dark:bg-slate-950" value={task.status} onChange={(e) => router.patch(`/tasks/${task.id}/status`, { status: e.target.value }, { preserveScroll: true })}>
                                                                         <option value="todo">{statusLabels.todo}</option>
                                                                         <option value="doing">{statusLabels.doing}</option>
                                                                         <option value="done">{statusLabels.done}</option>
