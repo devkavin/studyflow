@@ -1,0 +1,3 @@
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, useForm } from '@inertiajs/react';
+export default function Todos({todos}:{todos:any[]}) { const f=useForm({title:'',status:'todo'} as any); return <AuthenticatedLayout><Head title='Todos' /><form onSubmit={e=>{e.preventDefault();f.post(route('todos.store'));}} className='mb-4 flex gap-2'><input className='rounded border p-2' value={f.data.title} onChange={e=>f.setData('title',e.target.value)} /><button className='rounded bg-indigo-600 px-3 py-2 text-white'>Add</button></form>{todos.map(t=><div key={t.id} className='mb-2 rounded bg-white p-3 shadow'>{t.title} - {t.status}</div>)}</AuthenticatedLayout>; }
