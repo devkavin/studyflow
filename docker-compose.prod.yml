@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    env_file: .env
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.studyflow.rule=Host(`solidscalelabs.studyflow.com`)
+      - traefik.http.routers.studyflow.entrypoints=websecure
+      - traefik.http.routers.studyflow.tls.certresolver=letsencrypt
+      - traefik.http.services.studyflow.loadbalancer.server.port=8000
+    networks: [proxy, internal]
+    command: sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"
+  db:
+    image: postgres:16-alpine
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    networks: [internal]
+volumes: { pgdata: {} }
+networks:
+  proxy: { external: true }
+  internal: {}
