@@ -21,7 +21,7 @@ export default function AuthenticatedLayout({
     header,
 }: PropsWithChildren<{ header?: ReactNode }>) {
     const user = useAuthUser();
-    const { isDark, toggleTheme } = useTheme();
+    const { isDark, themePreference, toggleTheme, setThemePreference } = useTheme();
 
     return (
         <div className="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
@@ -38,7 +38,12 @@ export default function AuthenticatedLayout({
                         ))}
                     </div>
                     <div className="flex items-center gap-3">
-                        <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
+                        <ThemeToggle
+                            isDark={isDark}
+                            themePreference={themePreference}
+                            onToggle={toggleTheme}
+                            onSystem={() => setThemePreference('system')}
+                        />
                         <Dropdown>
                             <Dropdown.Trigger>
                                 <button className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">

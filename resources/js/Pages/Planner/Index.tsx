@@ -15,7 +15,7 @@ export default function Planner({ items }: { items: PlannerItem[] }) {
         <AuthenticatedLayout>
             <Head title="Planner" />
             <div className="mb-4 flex items-center justify-between">
-                <h1 className="text-2xl font-semibold text-slate-900">7-Day Planner</h1>
+                <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">7-Day Planner</h1>
                 <button
                     onClick={() => form.post(route('planner.autoplan'))}
                     className="rounded bg-indigo-600 px-3 py-2 text-white"
@@ -25,7 +25,7 @@ export default function Planner({ items }: { items: PlannerItem[] }) {
             </div>
             <div className="grid gap-3 md:grid-cols-2">
                 {items.map((item) => (
-                    <div key={item.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+                    <div key={item.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
                         {item.date}: {item.title} ({item.planned_minutes}m)
                     </div>
                 ))}

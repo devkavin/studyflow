@@ -30,16 +30,16 @@ export default function Settings() {
                     e.preventDefault();
                     form.patch(route('settings.update'));
                 }}
-                className="max-w-lg space-y-2 rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+                className="max-w-lg space-y-2 rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
             >
                 <input
-                    className="w-full rounded-md border-slate-300"
+                    className="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                     value={form.data.timezone}
                     onChange={(e) => form.setData('timezone', e.target.value)}
                 />
                 <input
                     type="number"
-                    className="w-full rounded-md border-slate-300"
+                    className="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                     value={form.data.daily_study_goal_minutes}
                     onChange={(e) => form.setData('daily_study_goal_minutes', Number(e.target.value))}
                 />

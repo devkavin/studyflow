@@ -14,8 +14,8 @@ export default function Timer({ activeSession }: { activeSession: ActiveSession 
     return (
         <AuthenticatedLayout>
             <Head title="Timer" />
-            <h1 className="mb-4 text-2xl font-semibold text-slate-900">Focus Timer</h1>
-            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <h1 className="mb-4 text-2xl font-semibold text-slate-900 dark:text-slate-100">Focus Timer</h1>
+            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
                 <p>{session ? `Active since ${session.start_time}` : 'No active session'}</p>
                 <div className="mt-3 flex gap-2">
                     <button
