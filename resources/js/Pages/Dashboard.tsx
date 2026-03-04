@@ -29,7 +29,7 @@ const statusLabels = {
     done: 'Completed',
 } as const;
 
-export default function Dashboard({ dashboard }: { dashboard: DashboardMetrics }) {
+export default function Dashboard({ dashboard }: { dashboard?: DashboardMetrics }) {
     const user = useAuthUser();
     const now = new Date();
     const focusMinutes = user?.pomodoro_focus_minutes ?? 25;
@@ -39,9 +39,23 @@ export default function Dashboard({ dashboard }: { dashboard: DashboardMetrics }
     const [focusStartTime, setFocusStartTime] = useState<Date | null>(new Date(now.getTime() + 15 * 60000));
     const [focusDuration, setFocusDuration] = useState(focusMinutes);
 
-    const maxTrendMinutes = useMemo(() => Math.max(...dashboard.focus_trend.map((point) => point.minutes), 1), [dashboard.focus_trend]);
-    const completionRate = dashboard.today_total_items ? Math.round((dashboard.today_completed_items / dashboard.today_total_items) * 100) : 0;
-    const goalProgress = Math.min(100, Math.round((dashboard.today_focus_minutes / goalMinutes) * 100));
+
+    const safeDashboard: DashboardMetrics = {
+        today_focus_minutes: dashboard?.today_focus_minutes ?? 0,
+        week_focus_minutes: dashboard?.week_focus_minutes ?? 0,
+        today_planned_minutes: dashboard?.today_planned_minutes ?? 0,
+        today_completed_items: dashboard?.today_completed_items ?? 0,
+        today_total_items: dashboard?.today_total_items ?? 0,
+        focus_trend: dashboard?.focus_trend ?? [],
+        upcoming_items: dashboard?.upcoming_items ?? [],
+    };
+    const maxTrendMinutes = useMemo(() => Math.max(...safeDashboard.focus_trend.map((point) => point.minutes), 1), [safeDashboard.focus_trend]);
+    const completionRate = safeDashboard.today_total_items ? Math.round((safeDashboard.today_completed_items / safeDashboard.today_total_items) * 100) : 0;
+    const goalProgress = Math.min(100, Math.round((safeDashboard.today_focus_minutes / goalMinutes) * 100));
+    const hasFocusData = safeDashboard.today_focus_minutes > 0;
+    const hasWeeklyData = safeDashboard.week_focus_minutes > 0;
+    const hasPlannedData = safeDashboard.today_total_items > 0;
+    const hasCompletionData = safeDashboard.today_total_items > 0;
 
     return (
         <AuthenticatedLayout>
@@ -56,40 +70,60 @@ export default function Dashboard({ dashboard }: { dashboard: DashboardMetrics }
                 <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div className="mb-2 flex items-center gap-2 text-slate-500 dark:text-slate-400"><Clock3 className="h-4 w-4" /><span className="text-xs uppercase tracking-wide">Today focus</span></div>
-                        <p className="text-2xl font-semibold">{dashboard.today_focus_minutes} min</p>
-                        <p className="mt-1 text-xs text-slate-500">Goal progress: {goalProgress}% of {goalMinutes} min</p>
+                        <p className="text-2xl font-semibold">{safeDashboard.today_focus_minutes} min</p>
+                        <p className="mt-1 text-xs text-slate-500">
+                            {hasFocusData
+                                ? `Goal progress: ${goalProgress}% of ${goalMinutes} min`
+                                : `Log a focus session to start tracking progress toward your ${goalMinutes} min goal.`}
+                        </p>
                     </article>
                     <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div className="mb-2 flex items-center gap-2 text-slate-500 dark:text-slate-400"><Flame className="h-4 w-4" /><span className="text-xs uppercase tracking-wide">This week</span></div>
-                        <p className="text-2xl font-semibold">{dashboard.week_focus_minutes} min</p>
-                        <p className="mt-1 text-xs text-slate-500">Sustained output across the week.</p>
+                        <p className="text-2xl font-semibold">{safeDashboard.week_focus_minutes} min</p>
+                        <p className="mt-1 text-xs text-slate-500">
+                            {hasWeeklyData ? 'Sustained output across the week.' : 'Complete at least one focus block to populate your weekly total.'}
+                        </p>
                     </article>
                     <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div className="mb-2 flex items-center gap-2 text-slate-500 dark:text-slate-400"><CalendarCheck2 className="h-4 w-4" /><span className="text-xs uppercase tracking-wide">Today's plan</span></div>
-                        <p className="text-2xl font-semibold">{dashboard.today_planned_minutes} min</p>
-                        <p className="mt-1 text-xs text-slate-500">{dashboard.today_total_items} scheduled block(s).</p>
+                        <p className="text-2xl font-semibold">{safeDashboard.today_planned_minutes} min</p>
+                        <p className="mt-1 text-xs text-slate-500">
+                            {hasPlannedData
+                                ? `${safeDashboard.today_total_items} scheduled block(s).`
+                                : 'Add tasks with due dates in Planner, Todos, or Curriculum to see today\'s plan.'}
+                        </p>
                     </article>
                     <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div className="mb-2 flex items-center gap-2 text-slate-500 dark:text-slate-400"><CheckCircle2 className="h-4 w-4" /><span className="text-xs uppercase tracking-wide">Completion</span></div>
                         <p className="text-2xl font-semibold">{completionRate}%</p>
-                        <p className="mt-1 text-xs text-slate-500">{dashboard.today_completed_items}/{dashboard.today_total_items} completed today.</p>
+                        <p className="mt-1 text-xs text-slate-500">
+                            {hasCompletionData
+                                ? `${safeDashboard.today_completed_items}/${safeDashboard.today_total_items} completed today.`
+                                : 'Mark tasks as done to view your completion rate.'}
+                        </p>
                     </article>
                 </section>
 
                 <section className="grid gap-4 xl:grid-cols-3">
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 xl:col-span-2">
                         <div className="mb-4 flex items-center justify-between"><h2 className="text-lg font-semibold">7-day focus trend</h2><BarChart3 className="h-4 w-4 text-slate-500" /></div>
-                        <div className="grid grid-cols-7 gap-2">
-                            {dashboard.focus_trend.map((point) => (
-                                <div key={point.date} className="flex flex-col items-center gap-2">
-                                    <div className="flex h-36 w-full items-end rounded-md bg-slate-100 px-2 py-2 dark:bg-slate-800">
-                                        <div className="w-full rounded bg-indigo-500" style={{ height: `${Math.max(8, (point.minutes / maxTrendMinutes) * 100)}%` }} />
+                        {safeDashboard.focus_trend.length === 0 ? (
+                            <div className="rounded-md border border-dashed border-slate-300 p-6 text-sm text-slate-500 dark:border-slate-700">
+                                No trend data yet. Update your timer sessions to view focus analytics here.
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-7 gap-2">
+                                {safeDashboard.focus_trend.map((point) => (
+                                    <div key={point.date} className="flex flex-col items-center gap-2">
+                                        <div className="flex h-36 w-full items-end rounded-md bg-slate-100 px-2 py-2 dark:bg-slate-800">
+                                            <div className="w-full rounded bg-indigo-500" style={{ height: `${Math.max(8, (point.minutes / maxTrendMinutes) * 100)}%` }} />
+                                        </div>
+                                        <p className="text-xs font-medium">{point.minutes}m</p>
+                                        <p className="text-xs text-slate-500">{format(new Date(point.date), 'EEE')}</p>
                                     </div>
-                                    <p className="text-xs font-medium">{point.minutes}m</p>
-                                    <p className="text-xs text-slate-500">{format(new Date(point.date), 'EEE')}</p>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -123,8 +157,8 @@ export default function Dashboard({ dashboard }: { dashboard: DashboardMetrics }
                             <ListTodo className="h-4 w-4 text-slate-500" />
                         </div>
                         <div className="space-y-2">
-                            {dashboard.upcoming_items.length === 0 && <p className="text-sm text-slate-500">No upcoming deadlines. Great job staying ahead.</p>}
-                            {dashboard.upcoming_items.map((item) => (
+                            {safeDashboard.upcoming_items.length === 0 && <p className="text-sm text-slate-500">No upcoming deadlines. Great job staying ahead.</p>}
+                            {safeDashboard.upcoming_items.map((item) => (
                                 <div key={`${item.type}-${item.id}`} className="rounded-md border border-slate-200 p-3 text-sm dark:border-slate-700">
                                     <div className="flex items-center justify-between gap-2">
                                         <p className="font-medium">{item.title}</p>
