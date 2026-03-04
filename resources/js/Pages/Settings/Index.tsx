@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
+import { useAuthUser } from '@/hooks/useAuth';
 
 type UserSettings = {
     timezone?: string;
@@ -11,14 +12,14 @@ type UserSettings = {
 };
 
 export default function Settings() {
-    const user = usePage().props.auth.user as UserSettings;
+    const user = useAuthUser() as UserSettings | null;
     const form = useForm({
-        timezone: user.timezone || 'UTC',
-        daily_study_goal_minutes: user.daily_study_goal_minutes || 90,
-        pomodoro_focus_minutes: user.pomodoro_focus_minutes || 25,
-        pomodoro_break_minutes: user.pomodoro_break_minutes || 5,
-        pomodoro_long_break_minutes: user.pomodoro_long_break_minutes || 15,
-        pomodoro_long_break_interval: user.pomodoro_long_break_interval || 4,
+        timezone: user?.timezone || 'UTC',
+        daily_study_goal_minutes: user?.daily_study_goal_minutes || 90,
+        pomodoro_focus_minutes: user?.pomodoro_focus_minutes || 25,
+        pomodoro_break_minutes: user?.pomodoro_break_minutes || 5,
+        pomodoro_long_break_minutes: user?.pomodoro_long_break_minutes || 15,
+        pomodoro_long_break_interval: user?.pomodoro_long_break_interval || 4,
     });
 
     return (

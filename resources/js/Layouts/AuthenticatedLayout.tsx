@@ -1,6 +1,7 @@
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import { useAuthUser } from '@/hooks/useAuth';
 import { PropsWithChildren, ReactNode } from 'react';
 
 const links = [
@@ -17,7 +18,7 @@ export default function AuthenticatedLayout({
     children,
     header,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const user = usePage().props.auth.user as { name: string; email: string };
+    const user = useAuthUser();
 
     return (
         <div className="min-h-screen bg-slate-100 text-slate-900">
@@ -36,7 +37,7 @@ export default function AuthenticatedLayout({
                     <Dropdown>
                         <Dropdown.Trigger>
                             <button className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700">
-                                {user.name}
+                                {user?.name ?? 'Account'}
                             </button>
                         </Dropdown.Trigger>
                         <Dropdown.Content>
