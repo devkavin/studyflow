@@ -8,7 +8,7 @@ export default function Welcome({
 }: {
     auth?: { user?: { name: string } | null };
 }) {
-    const { isDark, toggleTheme } = useTheme();
+    const { isDark, themePreference, toggleTheme, setThemePreference } = useTheme();
     const now = format(new Date(), 'EEEE, MMMM d · p');
 
     return (
@@ -17,7 +17,12 @@ export default function Welcome({
             <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
                 <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-6">
                     <p className="text-base font-semibold text-indigo-600 dark:text-indigo-400">StudyFlow</p>
-                    <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
+                    <ThemeToggle
+                        isDark={isDark}
+                        themePreference={themePreference}
+                        onToggle={toggleTheme}
+                        onSystem={() => setThemePreference('system')}
+                    />
                 </header>
 
                 <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-8 md:flex-row md:items-center md:justify-between">
