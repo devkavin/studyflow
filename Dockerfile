@@ -9,7 +9,7 @@ WORKDIR /var/www/html
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
-    && npm ci \
+    && npm install --include=dev \
     && npm run build \
     && php artisan config:cache
 
