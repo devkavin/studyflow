@@ -4,6 +4,7 @@ use App\Http\Controllers\Curriculum\QuickImportController;
 use App\Http\Controllers\Curriculum\SubjectController;
 use App\Http\Controllers\Curriculum\TaskController;
 use App\Http\Controllers\Curriculum\TopicController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Planner\PlannerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
@@ -17,7 +18,7 @@ Route::get('/health', fn () => response()->json(['status' => 'ok']));
 
 Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -25,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store');
     Route::post('/topics', [TopicController::class, 'store'])->name('topics.store');
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
+    Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.status');
     Route::post('/curriculum/import', QuickImportController::class)->name('curriculum.import');
 
     Route::get('/planner', [PlannerController::class, 'index'])->name('planner.index');
@@ -36,6 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/todos', [TodoController::class, 'index'])->name('todos.index');
     Route::post('/todos', [TodoController::class, 'store'])->name('todos.store');
+    Route::patch('/todos/{todo}/status', [TodoController::class, 'updateStatus'])->name('todos.status');
 
     Route::get('/stats', [StatsController::class, 'index'])->name('stats.index');
 
