@@ -1,20 +1,10 @@
 import { usePage } from '@inertiajs/react';
+import type { PageProps } from '@/types';
 
-export type AuthUser = {
-    name?: string;
-    email?: string;
-    email_verified_at?: string | null;
-    timezone?: string;
-    daily_study_goal_minutes?: number;
-    pomodoro_focus_minutes?: number;
-    pomodoro_break_minutes?: number;
-    pomodoro_long_break_minutes?: number;
-    pomodoro_long_break_interval?: number;
-};
+export type AuthUser = PageProps['auth']['user'];
 
 export function useAuthUser(): AuthUser | null {
-    const { props } = usePage();
-    const auth = (props as { auth?: { user?: AuthUser | null } }).auth;
+    const { props } = usePage<PageProps>();
 
-    return auth?.user ?? null;
+    return props.auth?.user ?? null;
 }
