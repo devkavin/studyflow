@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Curriculum\QuickImportController;
 use App\Http\Controllers\Curriculum\SubjectController;
 use App\Http\Controllers\Curriculum\TaskController;
@@ -17,9 +16,6 @@ use Inertia\Inertia;
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
 
 Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
-Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
-Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

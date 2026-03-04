@@ -6,6 +6,9 @@ import { PageProps as AppPageProps } from './';
 declare global {
     interface Window {
         axios: AxiosInstance;
+        onGoogleSignIn?: (googleUser: {
+            getAuthResponse: () => { id_token: string };
+        }) => void;
     }
 
     /* eslint-disable no-var */
