@@ -5,7 +5,11 @@ StudyFlow is a Laravel 12 + Inertia React app for curriculum planning, focus tra
 ## Local development
 1. `cp .env.example .env`
 2. Set DB to postgres service values.
-3. `make dev`
+3. Start services (recommended split startup):
+   - `make dev-db-up`
+   - `make dev-app-up`
+4. Run migrations only when you intend to change schema:
+   - `make dev-migrate`
 
 ## Test
 - `make test`
@@ -24,7 +28,11 @@ StudyFlow is a Laravel 12 + Inertia React app for curriculum planning, focus tra
    - `mkdir -p letsencrypt && touch letsencrypt/acme.json && chmod 600 letsencrypt/acme.json`
    - `docker compose up -d`
 4. Configure app `.env` and route domain `solidscalelabs.studyflow.com` to host IP.
-5. `make prod-up`
+5. Start services (recommended split startup):
+   - `make prod-db-up`
+   - `make prod-app-up`
+6. Run migrations explicitly during deployment windows:
+   - `make prod-migrate`
 
 ## Security checklist
 - Expose only 80/443 publicly.

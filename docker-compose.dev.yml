@@ -1,7 +1,13 @@
 services:
   app:
     build: .
-    command: sh -c "php artisan migrate && php artisan serve --host=0.0.0.0 --port=8000"
+    command: >-
+      sh -c '
+      until php -r "try { new PDO(\"pgsql:host=${DB_HOST};port=${DB_PORT};dbname=${DB_DATABASE}\", \"${DB_USERNAME}\", \"${DB_PASSWORD}\"); } catch (Exception $e) { exit(1); }"; do
+        echo "Waiting for PostgreSQL to be ready...";
+        sleep 2;
+      done;
+      php artisan serve --host=0.0.0.0 --port=8000'
     ports: ["8000:8000"]
     environment:
       APP_ENV: local
@@ -11,7 +17,11 @@ services:
       DB_DATABASE: studyflow
       DB_USERNAME: studyflow
       DB_PASSWORD: studyflow
-    depends_on: [db]
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    restart: unless-stopped
   db:
     image: postgres:16-alpine
     environment:
@@ -19,5 +29,12 @@ services:
       POSTGRES_USER: studyflow
       POSTGRES_PASSWORD: studyflow
     volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studyflow -d studyflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    restart: unless-stopped
 volumes:
   pgdata:
