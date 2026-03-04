@@ -1,40 +1,74 @@
 services:
   app:
-    build: .
-    command: >-
-      sh -c '
-      until php -r "try { new PDO(\"pgsql:host=${DB_HOST};port=${DB_PORT};dbname=${DB_DATABASE}\", \"${DB_USERNAME}\", \"${DB_PASSWORD}\"); } catch (Exception $e) { exit(1); }"; do
-        echo "Waiting for PostgreSQL to be ready...";
-        sleep 2;
-      done;
-      php artisan serve --host=0.0.0.0 --port=8000'
-    ports: ["8000:8000"]
+    build:
+      context: .
+      target: dev
+    container_name: studyflow-app-dev
+    working_dir: /var/www/html
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    env_file:
+      - .env
     environment:
       APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
       DB_CONNECTION: pgsql
       DB_HOST: db
       DB_PORT: 5432
       DB_DATABASE: studyflow
       DB_USERNAME: studyflow
       DB_PASSWORD: studyflow
+    volumes:
+      - ./:/var/www/html
+      - composer_vendor:/var/www/html/vendor
+      - node_modules:/var/www/html/node_modules
+    ports:
+      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
-        restart: true
     restart: unless-stopped
+
+  vite:
+    build:
+      context: .
+      target: dev
+    container_name: studyflow-vite-dev
+    working_dir: /var/www/html
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    env_file:
+      - .env
+    environment:
+      VITE_PORT: 5173
+    volumes:
+      - ./:/var/www/html
+      - node_modules:/var/www/html/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
+    restart: unless-stopped
+
   db:
     image: postgres:16-alpine
+    container_name: studyflow-db-dev
     environment:
       POSTGRES_DB: studyflow
       POSTGRES_USER: studyflow
       POSTGRES_PASSWORD: studyflow
-    volumes: ["pgdata:/var/lib/postgresql/data"]
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U studyflow -d studyflow"]
       interval: 5s
       timeout: 5s
-      retries: 12
-      start_period: 5s
+      retries: 10
+      start_period: 10s
     restart: unless-stopped
+
 volumes:
-  pgdata:
+  composer_vendor:
+  node_modules:
+  pgdata_dev:
