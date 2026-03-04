@@ -36,6 +36,7 @@
         "clsx": "^2.1.1",
         "date-fns": "^4.1.0",
         "lucide-react": "^0.577.0",
+        "react-datepicker": "^9.1.0",
         "react-hook-form": "^7.71.2",
         "react-timer-hook": "^4.0.5",
         "recharts": "^3.7.0",
