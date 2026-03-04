@@ -5,7 +5,7 @@ dev-db-up:
 	docker compose -f docker-compose.dev.yml up -d db
 
 dev-app-up:
-	docker compose -f docker-compose.dev.yml up -d --build app
+	docker compose -f docker-compose.dev.yml up -d --build app vite
 
 dev-migrate:
 	docker compose -f docker-compose.dev.yml exec app php artisan migrate
@@ -20,7 +20,7 @@ prod-db-up:
 	docker compose -f docker-compose.prod.yml up -d db
 
 prod-app-up:
-	docker compose -f docker-compose.prod.yml up -d --build app
+	docker compose -f docker-compose.prod.yml up -d --build app web
 
 prod-migrate:
 	docker compose -f docker-compose.prod.yml exec app php artisan migrate --force

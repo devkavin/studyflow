@@ -1,43 +1,71 @@
 services:
   app:
-    build: .
-    env_file: .env
+    build:
+      context: .
+      target: production
+    container_name: studyflow-app-prod
+    env_file:
+      - .env
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+    restart: unless-stopped
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: studyflow-web-prod
+    depends_on:
+      - app
+    volumes:
+      - ./public:/var/www/html/public:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     labels:
       - traefik.enable=true
       - traefik.http.routers.studyflow.rule=Host(`solidscalelabs.studyflow.com`)
       - traefik.http.routers.studyflow.entrypoints=websecure
       - traefik.http.routers.studyflow.tls.certresolver=letsencrypt
-      - traefik.http.services.studyflow.loadbalancer.server.port=8000
-    networks: [proxy, internal]
-    command: >-
-      sh -c '
-      until php -r "try { new PDO(\"pgsql:host=${DB_HOST};port=${DB_PORT};dbname=${DB_DATABASE}\", \"${DB_USERNAME}\", \"${DB_PASSWORD}\"); } catch (Exception $e) { exit(1); }"; do
-        echo "Waiting for PostgreSQL to be ready...";
-        sleep 2;
-      done;
-      php artisan serve --host=0.0.0.0 --port=8000'
-    depends_on:
-      db:
-        condition: service_healthy
-        restart: true
+      - traefik.http.services.studyflow.loadbalancer.server.port=80
+    ports:
+      - "8000:80"
+    networks:
+      - proxy
+      - internal
     restart: unless-stopped
+
   db:
     image: postgres:16-alpine
-    env_file: .env
+    container_name: studyflow-db-prod
+    env_file:
+      - .env
     environment:
       POSTGRES_DB: ${DB_DATABASE}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes: ["pgdata:/var/lib/postgresql/data"]
-    networks: [internal]
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
       interval: 5s
       timeout: 5s
-      retries: 12
+      retries: 10
       start_period: 10s
+    networks:
+      - internal
     restart: unless-stopped
-volumes: { pgdata: {} }
+
+volumes:
+  pgdata_prod:
+
 networks:
-  proxy: { external: true }
-  internal: {}
+  proxy:
+    external: true
+  internal:
+    driver: bridge
