@@ -11,6 +11,22 @@ StudyFlow is a Laravel 12 + Inertia React app for curriculum planning, focus tra
 4. Run migrations only when you intend to change schema:
    - `make dev-migrate`
 
+### If `make` is unavailable
+Use these equivalent Docker Compose commands:
+
+1. Start only Postgres:
+   - `docker compose -f docker-compose.dev.yml up -d db`
+2. Start app + Vite:
+   - `docker compose -f docker-compose.dev.yml up -d --build app vite`
+3. Run migrations:
+   - `docker compose -f docker-compose.dev.yml exec app php artisan migrate`
+4. Run tests:
+   - `docker compose -f docker-compose.dev.yml exec app php artisan test`
+5. Follow logs (optional):
+   - `docker compose -f docker-compose.dev.yml logs -f app vite db`
+6. Stop stack:
+   - `docker compose -f docker-compose.dev.yml down`
+
 ## Test
 - `make test`
 - `php artisan test --filter=StudyFlow`
@@ -33,6 +49,20 @@ StudyFlow is a Laravel 12 + Inertia React app for curriculum planning, focus tra
    - `make prod-app-up`
 6. Run migrations explicitly during deployment windows:
    - `make prod-migrate`
+
+### Production deployment commands (without `make`)
+1. Start only Postgres:
+   - `docker compose -f docker-compose.prod.yml up -d db`
+2. Start app + nginx:
+   - `docker compose -f docker-compose.prod.yml up -d --build app web`
+3. Run migrations:
+   - `docker compose -f docker-compose.prod.yml exec app php artisan migrate --force`
+4. Check running services:
+   - `docker compose -f docker-compose.prod.yml ps`
+5. Tail logs during rollout:
+   - `docker compose -f docker-compose.prod.yml logs -f app web db`
+6. Update deployment after pulling new code:
+   - `docker compose -f docker-compose.prod.yml up -d --build app web`
 
 ## Security checklist
 - Expose only 80/443 publicly.
