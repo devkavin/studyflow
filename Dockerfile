@@ -35,6 +35,7 @@ FROM php-base AS composer-deps
 COPY composer.json composer.lock ./
 RUN composer install \
     --no-interaction \
+    --no-scripts \
     --no-progress \
     --prefer-dist \
     --optimize-autoloader
@@ -67,7 +68,7 @@ FROM php-base AS dev
 RUN apk add --no-cache nodejs npm
 
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --prefer-dist
+RUN composer install --no-interaction --prefer-dist --no-scripts
 
 COPY package.json package-lock.json* ./
 RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
