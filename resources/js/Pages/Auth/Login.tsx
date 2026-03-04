@@ -4,8 +4,8 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { FormEventHandler, useEffect } from 'react';
 
 export default function Login({
     status,
@@ -19,6 +19,22 @@ export default function Login({
         password: '',
         remember: false as boolean,
     });
+
+    useEffect(() => {
+        window.onGoogleSignIn = (googleUser: {
+            getAuthResponse: () => { id_token: string };
+        }) => {
+            const idToken = googleUser.getAuthResponse().id_token;
+
+            router.post(route('google.token'), {
+                id_token: idToken,
+            });
+        };
+
+        return () => {
+            window.onGoogleSignIn = undefined;
+        };
+    }, []);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -106,8 +122,22 @@ export default function Login({
                 </div>
             </form>
 
-                <a href={route('google.redirect')} className="mt-4 inline-flex w-full justify-center rounded-md border border-slate-300 px-4 py-2 text-sm">Continue with Google</a>
+            <div className="mt-4 flex justify-center">
+                <div
+                    className="g-signin2"
+                    data-theme="outline"
+                    data-width="240"
+                    data-longtitle="true"
+                    data-onsuccess="onGoogleSignIn"
+                />
+            </div>
 
+            <a
+                href={route('google.redirect')}
+                className="mt-4 inline-flex w-full justify-center rounded-md border border-slate-300 px-4 py-2 text-sm"
+            >
+                Continue with Google
+            </a>
         </GuestLayout>
     );
 }

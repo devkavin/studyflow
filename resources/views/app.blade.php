@@ -10,6 +10,12 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <!-- Google Sign-In -->
+        <meta name="google-signin-client_id" content="{{ config('services.google.client_id') }}">
+        <meta name="google-signin-scope" content="profile email">
+
+        <script src="https://apis.google.com/js/platform.js" async defer></script>
+
         <!-- Scripts -->
         @routes
         @viteReactRefresh
