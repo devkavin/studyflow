@@ -1,7 +1,7 @@
-FROM --platform=$BUILDPLATFORM php:8.3-fpm-alpine AS app
+FROM --platform=$BUILDPLATFORM php:8.4-fpm-alpine AS app
 
-RUN apk add --no-cache git curl libpq-dev postgresql-dev zip unzip npm nodejs libxml2-dev \
-    && docker-php-ext-install pdo pdo_pgsql dom
+RUN apk add --no-cache git curl libpq-dev postgresql-dev libzip-dev zip unzip npm nodejs libxml2-dev \
+    && docker-php-ext-install pdo pdo_pgsql dom zip
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
