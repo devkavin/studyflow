@@ -36,6 +36,7 @@ Use these equivalent Docker Compose commands:
 - `npm audit`
 
 ## Production (Hetzner CAX21 ARM64)
+See detailed hardening + sizing notes in `docs/hetzner-cax21-hardening.md`.
 1. Install Docker + Compose plugin.
 2. `docker network create proxy`
 3. Run Traefik stack once:
@@ -65,7 +66,7 @@ Use these equivalent Docker Compose commands:
    - `docker compose -f docker-compose.prod.yml up -d --build app web`
 
 ## Security checklist
-- Expose only 80/443 publicly.
+- Expose only 80/443 publicly (do not publish app/db container ports).
 - Use strong `.env` secrets (APP_KEY, DB password, Google OAuth creds).
 - Run as non-root container user.
 - Enable HTTPS via Traefik cert resolver.

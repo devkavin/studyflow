@@ -52,6 +52,8 @@ ENV APP_ENV=production \
 COPY . .
 COPY --from=composer-deps /var/www/html/vendor ./vendor
 COPY --from=assets-build /app/public/build ./public/build
+COPY docker/php/conf.d/production.ini /usr/local/etc/php/conf.d/zzz-production.ini
+COPY docker/php-fpm.d/zz-studyflow.conf /usr/local/etc/php-fpm.d/zz-studyflow.conf
 
 RUN rm -rf node_modules \
     && addgroup -g 1000 -S app \

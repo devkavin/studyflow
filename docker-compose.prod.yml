@@ -17,6 +17,8 @@ services:
         condition: service_healthy
     networks:
       - internal
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
 
   web:
@@ -33,11 +35,22 @@ services:
       - traefik.http.routers.studyflow.entrypoints=websecure
       - traefik.http.routers.studyflow.tls.certresolver=letsencrypt
       - traefik.http.services.studyflow.loadbalancer.server.port=80
-    ports:
-      - "8000:80"
+    expose:
+      - "80"
     networks:
       - proxy
       - internal
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
 
   db:
