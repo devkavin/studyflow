@@ -65,13 +65,38 @@ Use these equivalent Docker Compose commands:
    - `docker compose -f docker-compose.prod.yml up -d --build app web`
 
 ## Security checklist
-- Expose only 80/443 publicly.
+- Expose only 80/443 publicly (through Traefik only).
 - Use strong `.env` secrets (APP_KEY, DB password, Google OAuth creds).
+- Keep `APP_ENV=production` and `APP_DEBUG=false`.
+- Session hardening in `.env` for production:
+  - `SESSION_SECURE_COOKIE=true`
+  - `SESSION_HTTP_ONLY=true`
+  - `SESSION_SAME_SITE=lax`
 - Run as non-root container user.
 - Enable HTTPS via Traefik cert resolver.
 - Run `composer audit` and `npm audit` on each release.
 - Keep monthly dependency updates.
 - Configure backups: `scripts/backup_postgres.sh` (example cron: `0 2 * * * cd /srv/studyflow && ./scripts/backup_postgres.sh`).
+
+## Hetzner Console hardening (recommended)
+1. **Primary IP firewall**
+   - Allow inbound: TCP `22` (restricted to your admin IPs), `80`, `443`.
+   - Deny all other inbound ports.
+2. **Placement groups + snapshots**
+   - Use snapshots before major upgrades.
+   - Consider a placement group when running multiple instances.
+3. **Backups**
+   - Enable Hetzner volume/server backups and test restore.
+4. **SSH and access**
+   - Disable password SSH auth; use keys only.
+   - Use a non-root sudo user.
+5. **Monitoring + alerting**
+   - Turn on Hetzner monitoring and alert channels for CPU, memory, disk, and uptime.
+6. **DDoS and edge**
+   - Keep DDoS protection enabled.
+   - Optionally front with Cloudflare for WAF/rate limiting.
+7. **Patch cadence**
+   - Schedule OS patching (unattended-upgrades or weekly maintenance window).
 
 ## Environment variables
 - APP_NAME, APP_ENV, APP_KEY, APP_URL
