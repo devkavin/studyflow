@@ -59,9 +59,12 @@ RUN rm -rf node_modules \
     && mkdir -p storage/framework/{cache,sessions,testing,views} storage/logs bootstrap/cache \
     && chown -R app:app /var/www/html
 
+COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/99-opcache.ini
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
 USER app
 EXPOSE 9000
-CMD ["php-fpm"]
+CMD ["php-fpm", "-F"]
 
 FROM php-base AS dev
 
