@@ -40,10 +40,10 @@ services:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     labels:
       - traefik.enable=true
-      - traefik.http.routers.studyflow-http.rule=Host(`${APP_HOST:-solidscalelabs.studyflow.com}`)
+      - traefik.http.routers.studyflow-http.rule=Host(`${APP_HOST:-studyflow.135.181.33.50.sslip.io}`)
       - traefik.http.routers.studyflow-http.entrypoints=web
       - traefik.http.routers.studyflow-http.middlewares=studyflow-https-redirect
-      - traefik.http.routers.studyflow-https.rule=Host(`${APP_HOST:-solidscalelabs.studyflow.com}`)
+      - traefik.http.routers.studyflow-https.rule=Host(`${APP_HOST:-studyflow.135.181.33.50.sslip.io}`)
       - traefik.http.routers.studyflow-https.entrypoints=websecure
       - traefik.http.routers.studyflow-https.tls.certresolver=letsencrypt
       - traefik.http.routers.studyflow-https.service=studyflow
