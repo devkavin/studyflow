@@ -150,7 +150,7 @@ export default function Todos({ todos, subjects }: { todos: Todo[]; subjects: Su
                                                 className="mt-1 w-full rounded-md border-slate-300 text-sm dark:border-slate-700 dark:bg-slate-950"
                                                 value={todo.status}
                                                 onChange={(e) => {
-                                                    router.patch(`/todos/${todo.id}/status`, { status: e.target.value }, { preserveScroll: true });
+                                                    router.patch(route('todos.status', todo.id), { status: e.target.value }, { preserveScroll: true });
                                                 }}
                                             >
                                                 {statuses.map((nextStatus) => (
