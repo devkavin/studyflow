@@ -1,7 +1,7 @@
 import DatePickerInput from '@/Components/DatePickerInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 type Todo = {
     id: number;
@@ -23,8 +23,13 @@ const statusLabels: Record<Todo['status'], string> = {
 };
 
 export default function Todos({ todos, subjects }: { todos: Todo[]; subjects: Subject[] }) {
+    const [todoItems, setTodoItems] = useState(todos);
     const [query, setQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | Todo['status']>('all');
+
+    useEffect(() => {
+        setTodoItems(todos);
+    }, [todos]);
 
     const form = useForm({
         title: '',
@@ -41,18 +46,18 @@ export default function Todos({ todos, subjects }: { todos: Todo[]; subjects: Su
 
     const filtered = useMemo(
         () =>
-            todos.filter((todo) => {
+            todoItems.filter((todo) => {
                 const matchesQuery = todo.title.toLowerCase().includes(query.toLowerCase());
                 const matchesStatus = statusFilter === 'all' || todo.status === statusFilter;
                 return matchesQuery && matchesStatus;
             }),
-        [todos, query, statusFilter],
+        [todoItems, query, statusFilter],
     );
 
     const progress = useMemo(() => {
-        const done = todos.filter((todo) => todo.status === 'done').length;
-        return todos.length ? Math.round((done / todos.length) * 100) : 0;
-    }, [todos]);
+        const done = todoItems.filter((todo) => todo.status === 'done').length;
+        return todoItems.length ? Math.round((done / todoItems.length) * 100) : 0;
+    }, [todoItems]);
 
     const byStatus = useMemo(
         () =>
@@ -150,7 +155,20 @@ export default function Todos({ todos, subjects }: { todos: Todo[]; subjects: Su
                                                 className="mt-1 w-full rounded-md border-slate-300 text-sm dark:border-slate-700 dark:bg-slate-950"
                                                 value={todo.status}
                                                 onChange={(e) => {
-                                                    router.patch(route('todos.status', todo.id), { status: e.target.value }, { preserveScroll: true });
+                                                    const nextStatus = e.target.value as Todo['status'];
+
+                                                    setTodoItems((current) => current.map((item) => (item.id === todo.id ? { ...item, status: nextStatus } : item)));
+
+                                                    router.patch(
+                                                        route('todos.status', todo.id),
+                                                        { status: nextStatus },
+                                                        {
+                                                            preserveScroll: true,
+                                                            onError: () => {
+                                                                setTodoItems((current) => current.map((item) => (item.id === todo.id ? { ...item, status: todo.status } : item)));
+                                                            },
+                                                        },
+                                                    );
                                                 }}
                                             >
                                                 {statuses.map((nextStatus) => (
