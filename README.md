@@ -43,14 +43,44 @@ Use these equivalent Docker Compose commands:
    - create `.env` with `TRAEFIK_ACME_EMAIL`
    - `mkdir -p letsencrypt && touch letsencrypt/acme.json && chmod 600 letsencrypt/acme.json`
    - `docker compose up -d`
-4. Configure app `.env` and route domain `solidscalelabs.studyflow.com` to host IP.
-5. Start services (recommended split startup):
+4. Create and configure app `.env`:
+   - `cp .env.example .env`
+   - set `APP_ENV=production`, `APP_DEBUG=false`, and `APP_URL`
+   - set `DB_CONNECTION=pgsql`, `DB_HOST=db`, `DB_PORT=5432`
+   - set `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` (required)
+   - set `APP_KEY` (recommended safe flow):
+     - `docker compose -f docker-compose.prod.yml run --rm app php artisan key:generate --show`
+     - paste output into `.env` as `APP_KEY=...`
+5. Set `APP_HOST` in `.env` to the public hostname Traefik should route (example: `studyflow.135.181.33.50.sslip.io`).
+6. Route that hostname to host IP (DNS `A` record, or use `sslip.io`).
+7. Start services (recommended split startup):
    - `make prod-db-up`
    - `make prod-app-up`
-6. Run migrations explicitly during deployment windows:
+8. Run migrations explicitly during deployment windows:
    - `make prod-migrate`
 
+
+### Troubleshooting: Traefik shows `404 page not found`
+Traefik returns 404 when no router rule matches the request host/entrypoint. Common causes:
+
+- requested host does not match `APP_HOST` (for example hitting `135.181.33.50.sslip.io` while router expects `studyflow.135.181.33.50.sslip.io`)
+- app router was configured only for `websecure` and request was sent to `http://`
+
+This production compose config defines both an HTTP router (redirects to HTTPS) and an HTTPS router. Set `.env` `APP_HOST` and `APP_URL` to the same hostname, then redeploy:
+
+- `docker compose -f docker-compose.prod.yml up -d --build web`
+- `docker compose -f docker-compose.prod.yml logs -f web`
+
+### Troubleshooting: `file_get_contents(/var/www/html/.env)` during `key:generate`
+The production image does not copy `.env` into the container, so `docker compose exec app php artisan key:generate`
+cannot write `/var/www/html/.env`. Generate a key with `--show` and paste it into the host `.env` file instead:
+
+- `docker compose -f docker-compose.prod.yml run --rm app php artisan key:generate --show`
+
 ### Production deployment commands (without `make`)
+0. Ensure `.env` exists and has required DB variables:
+   - `cp -n .env.example .env`
+   - set `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
 1. Start only Postgres:
    - `docker compose -f docker-compose.prod.yml up -d db`
 2. Start app + nginx:
@@ -99,7 +129,7 @@ Use these equivalent Docker Compose commands:
    - Schedule OS patching (unattended-upgrades or weekly maintenance window).
 
 ## Environment variables
-- APP_NAME, APP_ENV, APP_KEY, APP_URL
+- APP_NAME, APP_ENV, APP_KEY, APP_URL, APP_HOST
 - DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
 - GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
 - SESSION_DOMAIN, SANCTUM_STATEFUL_DOMAINS
