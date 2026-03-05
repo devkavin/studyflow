@@ -169,7 +169,7 @@ export default function Index({ subjects }: { subjects: Subject[] }) {
                                                                 </div>
                                                                 <div className="mt-2 flex items-center gap-2">
                                                                     <span className="text-xs text-slate-500">Status</span>
-                                                                    <select className="rounded-md border-slate-300 text-xs dark:border-slate-700 dark:bg-slate-950" value={task.status} onChange={(e) => router.patch(`/tasks/${task.id}/status`, { status: e.target.value }, { preserveScroll: true })}>
+                                                                    <select className="rounded-md border-slate-300 text-xs dark:border-slate-700 dark:bg-slate-950" value={task.status} onChange={(e) => router.patch(route('tasks.status', task.id), { status: e.target.value }, { preserveScroll: true })}>
                                                                         <option value="todo">{statusLabels.todo}</option>
                                                                         <option value="doing">{statusLabels.doing}</option>
                                                                         <option value="done">{statusLabels.done}</option>
