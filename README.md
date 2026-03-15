@@ -38,12 +38,15 @@ Use these equivalent Docker Compose commands:
 ## Production (Hetzner CAX21 ARM64)
 1. Install Docker + Compose plugin.
 2. `docker network create proxy`
-3. Run Traefik stack once:
-   - `cd infra/traefik`
+3. Create a host-level Traefik folder (recommended location):
+   - `sudo mkdir -p /srv/infra/traefik && sudo chown -R $USER:$USER /srv/infra`
+   - `cd /srv/infra/traefik`
+   - Put your Traefik `docker-compose.yml` in this folder (this repo does not include `infra/traefik`).
+4. Run Traefik stack once:
    - create `.env` with `TRAEFIK_ACME_EMAIL`
    - `mkdir -p letsencrypt && touch letsencrypt/acme.json && chmod 600 letsencrypt/acme.json`
    - `docker compose up -d`
-4. Create and configure app `.env`:
+5. Create and configure app `.env`:
    - `cp .env.example .env`
    - set `APP_ENV=production`, `APP_DEBUG=false`, and `APP_URL`
    - set `DB_CONNECTION=pgsql`, `DB_HOST=db`, `DB_PORT=5432`
@@ -51,12 +54,12 @@ Use these equivalent Docker Compose commands:
    - set `APP_KEY` (recommended safe flow):
      - `docker compose -f docker-compose.prod.yml run --rm app php artisan key:generate --show`
      - paste output into `.env` as `APP_KEY=...`
-5. Set `APP_HOST` in `.env` to the public hostname Traefik should route (example: `studyflow.135.181.33.50.sslip.io`).
-6. Route that hostname to host IP (DNS `A` record, or use `sslip.io`).
-7. Start services (recommended split startup):
+6. Set `APP_HOST` in `.env` to the public hostname Traefik should route (example: `studyflow.135.181.33.50.sslip.io`).
+7. Route that hostname to host IP (DNS `A` record, or use `sslip.io`).
+8. Start services (recommended split startup):
    - `make prod-db-up`
    - `make prod-app-up`
-8. Run migrations explicitly during deployment windows:
+9. Run migrations explicitly during deployment windows:
    - `make prod-migrate`
 
 ## First-time Hetzner terminal setup (copy/paste guide)
@@ -74,9 +77,10 @@ Use these steps right after opening the terminal on a brand-new Hetzner Ubuntu s
 2. Configure a minimal host firewall (safe default):
    - `sudo ufw allow OpenSSH && sudo ufw allow 80/tcp && sudo ufw allow 443/tcp && sudo ufw --force enable`
 
-3. Create deployment folder and clone app:
-   - `sudo mkdir -p /srv && sudo chown $USER:$USER /srv`
+3. Create deployment folders (app + Traefik) and clone app:
+   - `sudo mkdir -p /srv/infra/traefik /srv && sudo chown -R $USER:$USER /srv`
    - `cd /srv && git clone <YOUR_REPO_URL> studyflow && cd studyflow`
+   - Traefik should live in `/srv/infra/traefik` (outside this repo) with its own `docker-compose.yml`.
 
 4. Create and configure `.env`:
    - `cp .env.example .env`
