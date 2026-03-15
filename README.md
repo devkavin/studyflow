@@ -59,6 +59,50 @@ Use these equivalent Docker Compose commands:
 8. Run migrations explicitly during deployment windows:
    - `make prod-migrate`
 
+## First-time Hetzner terminal setup (copy/paste guide)
+Use these steps right after opening the terminal on a brand-new Hetzner Ubuntu server.
+
+1. Install required packages (Git + Docker Engine + Compose plugin):
+   - `sudo apt update && sudo apt install -y ca-certificates curl gnupg git ufw`
+   - `sudo install -m 0755 -d /etc/apt/keyrings`
+   - `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`
+   - `sudo chmod a+r /etc/apt/keyrings/docker.gpg`
+   - `echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`
+   - `sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin`
+   - `sudo usermod -aG docker $USER` (log out/in once after this)
+
+2. Configure a minimal host firewall (safe default):
+   - `sudo ufw allow OpenSSH && sudo ufw allow 80/tcp && sudo ufw allow 443/tcp && sudo ufw --force enable`
+
+3. Create deployment folder and clone app:
+   - `sudo mkdir -p /srv && sudo chown $USER:$USER /srv`
+   - `cd /srv && git clone <YOUR_REPO_URL> studyflow && cd studyflow`
+
+4. Create and configure `.env`:
+   - `cp .env.example .env`
+   - Set at minimum: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://<your-domain>`, `APP_HOST=<your-domain>`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`.
+
+5. Generate app key safely and place it in `.env`:
+   - `docker compose -f docker-compose.prod.yml run --rm app php artisan key:generate --show`
+   - Copy output into `.env` as `APP_KEY=...`
+
+6. Start database, app, and web services:
+   - `docker compose -f docker-compose.prod.yml up -d db`
+   - `docker compose -f docker-compose.prod.yml up -d --build app web`
+
+7. Run migrations:
+   - `docker compose -f docker-compose.prod.yml exec app php artisan migrate --force`
+
+8. Verify everything is running:
+   - `docker compose -f docker-compose.prod.yml ps`
+   - `docker compose -f docker-compose.prod.yml logs -f app web db`
+
+### Fast rerun after git pull
+From `/srv/studyflow`, update with:
+- `git pull`
+- `docker compose -f docker-compose.prod.yml up -d --build app web`
+- `docker compose -f docker-compose.prod.yml exec app php artisan migrate --force`
+
 
 ### Troubleshooting: Traefik shows `404 page not found`
 Traefik returns 404 when no router rule matches the request host/entrypoint. Common causes:
