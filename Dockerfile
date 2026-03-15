@@ -44,6 +44,16 @@ FROM node-deps AS assets-build
 COPY . .
 RUN npm run build
 
+FROM nginx:1.27-alpine AS web
+
+WORKDIR /var/www/html
+
+COPY public ./public
+COPY --from=assets-build /app/public/build ./public/build
+COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+
+RUN rm -f ./public/hot
+
 FROM php-base AS production
 
 ENV APP_ENV=production \
@@ -54,6 +64,7 @@ COPY --from=composer-deps /var/www/html/vendor ./vendor
 COPY --from=assets-build /app/public/build ./public/build
 
 RUN rm -rf node_modules \
+    && rm -f public/hot \
     && addgroup -g 1000 -S app \
     && adduser -u 1000 -S -D -G app app \
     && mkdir -p storage/framework/{cache,sessions,testing,views} storage/logs bootstrap/cache \
