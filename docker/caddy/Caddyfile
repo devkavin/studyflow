@@ -1,0 +1,23 @@
+{
+    admin off
+}
+
+{$APP_HOST} {
+    encode zstd gzip
+
+    root * /var/www/html/public
+    php_fastcgi app:9000
+    file_server
+
+    @static path /build/* *.css *.gif *.ico *.jpeg *.jpg *.js *.map *.mjs *.png *.svg *.ttf *.webp *.woff *.woff2
+
+    header {
+        -Server
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    }
+
+    header @static Cache-Control "public, max-age=31536000, immutable"
+}

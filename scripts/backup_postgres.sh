@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
+BACKUP_DIR="${BACKUP_DIR:-backups}"
 TS=$(date +%F-%H%M%S)
-mkdir -p backups
-PGPASSWORD="${DB_PASSWORD}" pg_dump -h "${DB_HOST}" -U "${DB_USERNAME}" -d "${DB_DATABASE}" -Fc > "backups/studyflow-${TS}.dump"
+mkdir -p "${BACKUP_DIR}"
+
+docker compose -f "${COMPOSE_FILE}" exec -T db sh -lc 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "${BACKUP_DIR}/studyflow-${TS}.dump"

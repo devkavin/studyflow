@@ -29,30 +29,32 @@ COPY --from=composer:2.8 /usr/bin/composer /usr/local/bin/composer
 FROM node:${NODE_VERSION}-alpine AS node-deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+RUN --mount=type=cache,target=/root/.npm \
+    if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 FROM php-base AS composer-deps
 COPY composer.json composer.lock ./
-RUN composer install \
-    --no-interaction \
-    --no-scripts \
-    --no-progress \
-    --prefer-dist \
-    --optimize-autoloader
+RUN --mount=type=cache,target=/tmp/composer-cache \
+    COMPOSER_CACHE_DIR=/tmp/composer-cache composer install \
+        --no-dev \
+        --no-interaction \
+        --no-scripts \
+        --no-progress \
+        --prefer-dist \
+        --optimize-autoloader \
+        --classmap-authoritative
 
 FROM node-deps AS assets-build
 COPY . .
 RUN npm run build
 
-FROM nginx:1.27-alpine AS web
+FROM caddy:2.8-alpine AS web
 
 WORKDIR /var/www/html
 
 COPY public ./public
 COPY --from=assets-build /app/public/build ./public/build
-COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-
-RUN rm -f ./public/hot
+COPY docker/caddy/Caddyfile /etc/caddy/Caddyfile
 
 FROM php-base AS production
 
@@ -63,19 +65,20 @@ COPY . .
 COPY --from=composer-deps /var/www/html/vendor ./vendor
 COPY --from=assets-build /app/public/build ./public/build
 
-RUN rm -rf node_modules \
+RUN rm -rf docs node_modules tests \
     && rm -f public/hot \
     && addgroup -g 1000 -S app \
     && adduser -u 1000 -S -D -G app app \
-    && mkdir -p storage/framework/{cache,sessions,testing,views} storage/logs bootstrap/cache \
+    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache \
     && chown -R app:app /var/www/html
 
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/99-opcache.ini
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+COPY --chmod=755 docker/php/start-prod.sh /usr/local/bin/start-prod
 
 USER app
 EXPOSE 9000
-CMD ["php-fpm", "-F"]
+CMD ["start-prod"]
 
 FROM php-base AS dev
 
