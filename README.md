@@ -46,6 +46,7 @@ The production stack is now self-contained: `web` (Caddy with automatic HTTPS), 
 3. Set the required values in `.env`:
    - `APP_URL=https://<your-domain>`
    - `APP_HOST=<your-domain>`
+   - keep `WEB_HTTP_PORT=80` and `WEB_HTTPS_PORT=443` on the server
    - `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
 4. Generate an app key safely:
    - `docker compose -f docker-compose.prod.yml run --rm app php artisan key:generate --show`
@@ -119,6 +120,15 @@ Check:
 
 Then inspect Caddy:
 - `docker compose -f docker-compose.prod.yml logs -f web`
+
+### Troubleshooting: port `80` or `443` is already in use locally
+On Windows this is often `PID 4` (`System` / HTTP.sys, commonly IIS or another host web binding).
+
+For local-only testing you can remap the host ports in `.env`:
+- `WEB_HTTP_PORT=8080`
+- `WEB_HTTPS_PORT=8443`
+
+Then start the stack and open `https://localhost:8443` directly.
 
 ### Troubleshooting: `file_get_contents(/var/www/html/.env)` during `key:generate`
 The production image does not copy `.env` into the container, so `docker compose exec app php artisan key:generate`

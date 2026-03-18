@@ -41,8 +41,7 @@ RUN --mount=type=cache,target=/tmp/composer-cache \
         --no-scripts \
         --no-progress \
         --prefer-dist \
-        --optimize-autoloader \
-        --classmap-authoritative
+        --optimize-autoloader
 
 FROM node-deps AS assets-build
 COPY . .
@@ -67,6 +66,7 @@ COPY --from=assets-build /app/public/build ./public/build
 
 RUN rm -rf docs node_modules tests \
     && rm -f public/hot \
+    && rm -f bootstrap/cache/*.php \
     && addgroup -g 1000 -S app \
     && adduser -u 1000 -S -D -G app app \
     && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache \

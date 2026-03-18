@@ -44,8 +44,8 @@ services:
     depends_on:
       - app
     ports:
-      - "80:80"
-      - "443:443"
+      - "${WEB_HTTP_PORT:-80}:80"
+      - "${WEB_HTTPS_PORT:-443}:443"
     volumes:
       - ./storage/app/public:/var/www/html/public/storage:ro
       - caddy_data:/data
